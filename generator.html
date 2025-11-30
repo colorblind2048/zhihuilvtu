@@ -1,77 +1,487 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>智绘旅途 | AI 智能生成</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>智绘旅途 | AI 智能生成</title>
+    <style>
+        :root{
+            --blue-500: #1d6ce0;
+            --blue-600: #1555b0;
+            --blue-100: #eaf5ff;
+            --muted: #4b6173;
+            --card-bg: #ffffff;
+            --accent: #2b8bf6;
+            --pill-bg: #eef6ff;
+        }
+        *{box-sizing:border-box;}
+        html,body{height:100%;}
+        body{
+            margin:0;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            color:var(--muted);
+            background: linear-gradient(180deg, #f7fbff 0%, #eef7ff 100%);
+            padding-bottom:72px; /* leave space for bottom strip */
+        }
+
+        /* Header */
+        .site-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:14px 22px;
+            background:var(--blue-500);
+            color:#fff;
+            position:sticky;
+            top:0;
+            z-index:100;
+        }
+        .header-left{display:flex;align-items:center;gap:12px;}
+        .back-link{color:rgba(255,255,255,0.95);text-decoration:none;font-size:0.95rem;}
+        .small-logo{height:44px;width:44px;border-radius:8px;background:#fff;padding:6px;object-fit:contain;}
+        .brand h1{margin:0;font-size:1.05rem;color:#fff;}
+        .brand .slogan{margin:0;color:rgba(255,255,255,0.9);font-size:0.85rem;}
+        .header-right{display:flex;gap:10px;align-items:center;}
+        .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--blue-500);color:#fff;border:none;cursor:pointer;font-size:0.95rem;}
+        .btn:hover{background:var(--blue-600);}
+        .btn-outline{background:transparent;color:var(--blue-500);border:1px solid rgba(29,108,224,0.12);}
+        .btn-primary{background:var(--accent);color:#fff;}
+
+        /* Layout */
+        .container{max-width:1180px;margin:20px auto;padding:0 18px 24px 18px;}
+        .gen-container{display:flex;gap:20px;align-items:flex-start;}
+        .gen-left{flex:1 1 66%;}
+        .gen-right{flex:0 0 32%;}
+
+        /* Card */
+        .card{background:var(--card-bg);padding:16px;border-radius:12px;box-shadow:0 8px 24px rgba(41,102,173,0.06);border:1px solid rgba(29,108,224,0.06);margin-bottom:16px;}
+        .card-blue{border-left:6px solid var(--blue-500);}
+        .card-title{margin:0 0 10px 0;color:var(--blue-600);font-size:1.05rem;}
+        .muted{color:var(--muted);font-size:0.95rem;}
+
+        /* Tags grid */
+        .tags-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:10px;margin-top:10px;}
+        .tag{padding:10px 12px;border-radius:10px;border:1px solid rgba(29,108,224,0.12);background:linear-gradient(180deg,#fff,#f6fbff);color:var(--blue-600);cursor:pointer;text-align:center;transition:transform .12s, box-shadow .12s, background .12s;font-size:0.95rem;}
+        .tag:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(29,108,224,0.08);}
+        .tag.active{background:linear-gradient(180deg,var(--accent),var(--blue-600));color:white;border-color:transparent;box-shadow:0 10px 26px rgba(43,139,246,0.18);}
+
+        /* Generate area */
+        .gen-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+        .plan-list{margin-top:14px;display:flex;flex-direction:column;gap:12px;}
+        .plan-card{padding:12px;border-radius:10px;background:#f8fbff;border:1px solid rgba(29,108,224,0.06);display:flex;flex-direction:column;gap:8px;}
+        .plan-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+        .pill{background:var(--pill-bg);color:var(--blue-600);padding:4px 8px;border-radius:999px;font-size:0.82rem;border:1px solid rgba(29,108,224,0.06);}
+        .plan-actions{display:flex;gap:8px;margin-top:6px;}
+        .plan-actions .btn.small{background:#fff;color:var(--blue-600);border:1px solid rgba(29,108,224,0.12);}
+
+        /* Viz placeholder */
+        .viz-placeholder{height:260px;border-radius:10px;background:linear-gradient(180deg,#ffffff,#f3f9ff);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(29,108,224,0.06);overflow:hidden;}
+        .viz-placeholder img{width:100%;height:100%;object-fit:cover;}
+
+        /* Filters */
+        .filters{display:flex;flex-direction:column;gap:12px;margin-top:8px;}
+        .filter-row{display:flex;flex-direction:column;gap:6px;}
+        .filter-row label{font-weight:600;color:var(--blue-600);font-size:0.92rem;}
+        .filter-row select{padding:8px;border-radius:8px;border:1px solid rgba(29,108,224,0.08);}
+        .checkbox-group{display:flex;flex-wrap:wrap;gap:8px;}
+        .checkbox-group label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:0.92rem;}
+        .filter-actions{display:flex;gap:8px;margin-top:6px;}
+
+        .img-box.small{height:90px;border-radius:8px;overflow:hidden;margin-top:8px;}
+        .img-box.small img{width:100%;height:100%;object-fit:cover;}
+        .feature-list{list-style:none;padding:0;margin:8px 0 0;color:var(--muted);line-height:1.9;font-size:0.95rem;}
+
+        /* Bottom strip */
+        .bottom-strip{position:fixed;left:0;right:0;bottom:0;background:var(--blue-500);color:#fff;padding:12px 18px;box-shadow:0 -6px 20px rgba(26,90,170,0.12);}
+        .bottom-container{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+        .bottom-title{font-weight:700;}
+        .bottom-note{opacity:0.95;font-size:0.92rem}
+
+        /* Responsive */
+        @media (max-width:980px){
+            .gen-container{flex-direction:column;}
+            .gen-left, .gen-right{flex:1 1 100%;}
+            .tags-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+            .viz-placeholder{height:200px;}
+        }
+    </style>
 </head>
 <body>
-  <header class="site-header small">
+
+<header class="site-header small">
     <div class="header-left">
-      <a href="index.html" class="back-link">← 返回首页</a>
-      <img src="assets/logo-placeholder.png" alt="Logo" class="logo small-logo" />
-      <div class="brand">
-        <h1>AI 智能生成</h1>
-        <p class="slogan">多风格方案，一键生成并可视化编辑</p>
-      </div>
+        <a href="index.html" class="back-link">← 返回首页</a>
+        <img src="assets/logo-placeholder.png" alt="智绘旅途 Logo" class="small-logo" />
+        <div class="brand">
+            <h1>AI 智能生成</h1>
+            <p class="slogan">多风格方案，一键生成并可视化编辑</p>
+        </div>
     </div>
+
     <nav class="header-right">
-      <a href="#" class="btn btn-outline">注册</a>
-      <a href="#" class="btn btn-primary">登录</a>
+        <button class="btn btn-outline" id="btn-register">注册</button>
+        <button class="btn btn-primary" id="btn-login">登录</button>
     </nav>
-  </header>
+</header>
 
-  <main class="container">
-    <section class="panel-page">
-      <div class="panel-left">
-        <div class="card">
-          <h2>选择标签</h2>
-          <p>选择出游主题与偏好标签（例如：亲子、深度探索、慢旅行、美食品鉴、轻徒步等）</p>
-          <div class="tags">
-            <button class="tag">亲子</button>
-            <button class="tag">美食</button>
-            <button class="tag">自然</button>
-            <button class="tag">文化</button>
-            <button class="tag">摄影</button>
-          </div>
-
-          <h2 style="margin-top:18px">生成方案</h2>
-          <div class="actions">
-            <button class="btn btn-primary">生成多套方案</button>
-            <button class="btn">可视化编辑</button>
-            <button class="btn btn-outline">导出/保存方案</button>
-          </div>
+<main class="container gen-container">
+    <section class="gen-left">
+        <!-- 标签选择 -->
+        <div class="card card-blue" id="card-tags">
+            <h2 class="card-title">选择标签（多选）</h2>
+            <p class="muted">选择更多标签帮助 AI 构建更立体的行程侧重点，可多选组合以获得差异化方案。</p>
+            <div class="tags-grid" id="tagsGrid">
+                <button class="tag" data-tag="亲子">亲子</button>
+                <button class="tag" data-tag="美食">美食</button>
+                <button class="tag" data-tag="自然">自然</button>
+                <button class="tag" data-tag="文化">文化</button>
+                <button class="tag" data-tag="摄影">摄影</button>
+                <button class="tag" data-tag="温泉养生">温泉养生</button>
+                <button class="tag" data-tag="夜生活">夜生活</button>
+                <button class="tag" data-tag="轻徒步">轻徒步</button>
+                <button class="tag" data-tag="深度探访">深度探访</button>
+                <button class="tag" data-tag="自驾">自驾</button>
+                <button class="tag" data-tag="滑雪/冰雪">滑雪/冰雪</button>
+                <button class="tag" data-tag="海滩放松">海滩放松</button>
+                <button class="tag" data-tag="文艺小众">文艺小众</button>
+                <button class="tag" data-tag="历史遗迹">历史遗迹</button>
+                <button class="tag" data-tag="节庆体验">节庆体验</button>
+                <button class="tag" data-tag="宠友同行">宠友同行</button>
+            </div>
         </div>
 
-        <div class="card">
-          <h2>方案预览（占位）</h2>
-          <div class="img-box">
-            <img src="assets/plan-preview.png" alt="方案预览" />
-          </div>
-        </div>
-      </div>
+        <!-- 生成方案 -->
+        <div class="card card-blue" id="card-generate">
+            <h2 class="card-title">生成方案</h2>
+            <p class="muted">基于已选标签与偏好，生成多套风格不同的可编辑行程方案。</p>
 
-      <aside class="panel-right">
-        <div class="card small">
-          <h3>方案筛选</h3>
-          <ul class="feature-list">
-            <li>节奏：轻松 / 适中 / 紧凑</li>
-            <li>预算偏好</li>
-            <li>交通优先级（高铁/自驾/飞机）</li>
-          </ul>
+            <div class="gen-actions">
+                <button class="btn btn-primary large" id="btn-generate">生成多套方案</button>
+                <button class="btn" id="btn-random">随机风格 (探索)</button>
+                <button class="btn btn-outline" id="btn-clear-tags">清除已选标签</button>
+                <button class="btn" id="preview-sample">示例方案预览</button>
+            </div>
+
+            <div class="plan-list" id="planList">
+                <!-- 动态生成的方案卡片将插入在这里 -->
+            </div>
         </div>
 
-        <div class="card small">
-          <h3>可视化工具</h3>
-          <p>地图、日程甘特图、时间轴视图等（占位）</p>
+        <!-- 方案预览 / 可视化 -->
+        <div class="card card-blue">
+            <h2 class="card-title">方案预览（可视化占位）</h2>
+            <div class="viz-placeholder">
+                <img src="assets/plan-preview.png" alt="方案预览">
+            </div>
         </div>
-      </aside>
     </section>
-  </main>
 
-  <footer class="site-footer">
-    <p>智绘旅途 · AI 智能生成板块</p>
-  </footer>
+    <aside class="gen-right">
+        <div class="card card-blue">
+            <h3 class="card-title">方案筛选</h3>
+            <p class="muted">多维度筛选，快速定位最符合期望的方案。</p>
+            <form class="filters" id="filtersForm">
+                <div class="filter-row">
+                    <label>节奏</label>
+                    <select id="filterPace">
+                        <option value="">任意</option>
+                        <option>轻松</option>
+                        <option selected>适中</option>
+                        <option>紧凑</option>
+                        <option>自由活动优先</option>
+                    </select>
+                </div>
+
+                <div class="filter-row">
+                    <label>预算</label>
+                    <select id="filterBudget">
+                        <option value="">任意</option>
+                        <option>经济</option>
+                        <option selected>中等</option>
+                        <option>高端</option>
+                        <option>自定义</option>
+                    </select>
+                </div>
+
+                <div class="filter-row">
+                    <label>出行交通偏好</label>
+                    <div class="checkbox-group" id="filterTransport">
+                        <label><input type="checkbox" value="高铁"> 高铁</label>
+                        <label><input type="checkbox" value="飞机"> 飞机</label>
+                        <label><input type="checkbox" value="自驾"> 自驾</label>
+                        <label><input type="checkbox" value="公交/地铁"> 公交/地铁</label>
+                    </div>
+                </div>
+
+                <div class="filter-row">
+                    <label>住宿类型</label>
+                    <div class="checkbox-group" id="filterStay">
+                        <label><input type="checkbox" value="酒店"> 酒店</label>
+                        <label><input type="checkbox" value="民宿"> 民宿</label>
+                        <label><input type="checkbox" value="青年旅社"> 青年旅社</label>
+                        <label><input type="checkbox" value="度假村"> 度假村</label>
+                    </div>
+                </div>
+
+                <div class="filter-row">
+                    <label>适配人群</label>
+                    <div class="checkbox-group" id="filterPeople">
+                        <label><input type="checkbox" value="青年"> 单身/青年</label>
+                        <label><input type="checkbox" value="情侣"> 夫妻/情侣</label>
+                        <label><input type="checkbox" value="亲子"> 亲子</label>
+                        <label><input type="checkbox" value="老人"> 老人陪同</label>
+                        <label><input type="checkbox" value="宠物"> 宠物友好</label>
+                    </div>
+                </div>
+
+                <div class="filter-row">
+                    <label>时长</label>
+                    <select id="filterDuration">
+                        <option value="">任意</option>
+                        <option>半日</option>
+                        <option>1-2 天</option>
+                        <option selected>3-5 天</option>
+                        <option>一周及以上</option>
+                    </select>
+                </div>
+
+                <div class="filter-row">
+                    <label>季节偏好</label>
+                    <div class="checkbox-group" id="filterSeason">
+                        <label><input type="checkbox" value="春"> 春</label>
+                        <label><input type="checkbox" value="夏"> 夏</label>
+                        <label><input type="checkbox" value="秋"> 秋</label>
+                        <label><input type="checkbox" value="冬"> 冬</label>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" class="btn btn-primary" id="btn-apply-filters">应用筛选</button>
+                    <button type="button" class="btn btn-outline" id="btn-reset-filters">重置</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card card-blue">
+            <h3 class="card-title">可视化工具（占位）</h3>
+            <ul class="feature-list">
+                <li>地图视图（地点分布）</li>
+                <li>日程甘特图</li>
+                <li>时间轴与预算曲线</li>
+                <li>活动浓度热力图</li>
+            </ul>
+            <div class="img-box small">
+                <img src="assets/visual-tools.png" alt="可视化工具">
+            </div>
+        </div>
+
+        <div class="card card-blue">
+            <h3 class="card-title">合作与广告位</h3>
+            <div class="img-box small">
+                <img src="assets/ad-placeholder.png" alt="广告位">
+            </div>
+        </div>
+    </aside>
+</main>
+
+<footer class="bottom-strip">
+    <div class="bottom-container">
+        <span class="bottom-title">智慧旅途 · 智绘旅途</span>
+        <span class="bottom-note">© 2025 智绘旅途</span>
+    </div>
+</footer>
+
+<script>
+    // 简单的标签交互与方案生成/筛选逻辑（UI 占位，非后端）
+    (function(){
+        const selectedTags = new Set();
+        const tagsGrid = document.getElementById('tagsGrid');
+        const tagButtons = tagsGrid.querySelectorAll('.tag');
+        const btnClear = document.getElementById('btn-clear-tags');
+        const btnGenerate = document.getElementById('btn-generate');
+        const btnRandom = document.getElementById('btn-random');
+        const planList = document.getElementById('planList');
+        const previewSample = document.getElementById('preview-sample');
+
+        // filter elements
+        const btnApplyFilters = document.getElementById('btn-apply-filters');
+        const btnResetFilters = document.getElementById('btn-reset-filters');
+
+        // toggle tag selection
+        tagButtons.forEach(btn=>{
+            btn.addEventListener('click', () => {
+                const tag = btn.dataset.tag;
+                if (selectedTags.has(tag)) {
+                    selectedTags.delete(tag);
+                    btn.classList.remove('active');
+                } else {
+                    selectedTags.add(tag);
+                    btn.classList.add('active');
+                }
+            });
+        });
+
+        // clear tags
+        btnClear.addEventListener('click', () => {
+            selectedTags.clear();
+            tagButtons.forEach(b => b.classList.remove('active'));
+        });
+
+        // helper to get selected filters as object
+        function getFilters(){
+            const pace = document.getElementById('filterPace').value;
+            const budget = document.getElementById('filterBudget').value;
+            const duration = document.getElementById('filterDuration').value;
+            const transport = Array.from(document.querySelectorAll('#filterTransport input:checked')).map(i=>i.value);
+            const stay = Array.from(document.querySelectorAll('#filterStay input:checked')).map(i=>i.value);
+            const people = Array.from(document.querySelectorAll('#filterPeople input:checked')).map(i=>i.value);
+            const season = Array.from(document.querySelectorAll('#filterSeason input:checked')).map(i=>i.value);
+            return {pace,budget,duration,transport,stay,people,season};
+        }
+
+        // simple random choice
+        function randChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+        // generate n mock plans using selected tags and filters (UI demo only)
+        function generatePlans(n = 3, styleHint = null) {
+            planList.innerHTML = '';
+            const selTags = Array.from(selectedTags);
+            const defaults = {
+                paceOptions: ['轻松','适中','紧凑','自由活动优先'],
+                budgetOptions: ['经济','中等','高端']
+            };
+            for (let i=0;i<n;i++){
+                const planTags = [];
+                // include some selected tags and some random extras to diversify
+                if (selTags.length){
+                    const take = Math.min(selTags.length, Math.max(1, Math.floor(Math.random()*(selTags.length))+1));
+                    // shuffle and take some
+                    const shuffled = selTags.slice().sort(()=>Math.random()-0.5);
+                    planTags.push(...shuffled.slice(0,take));
+                } else {
+                    // no tags selected -> pick random
+                    const pool = ['美食','自然','文化','摄影','海滩放松','夜生活','轻徒步','亲子','自驾','文艺小众'];
+                    planTags.push(randChoice(pool));
+                }
+                // maybe add 0-2 extra random tags
+                const extras = ['温泉养生','节庆体验','历史遗迹','滑雪/冰雪','宠友同行'];
+                if (Math.random()>0.5) planTags.push(randChoice(extras));
+                if (Math.random()>0.85) planTags.push(randChoice(extras));
+
+                const pace = styleHint || randChoice(defaults.paceOptions);
+                const budget = randChoice(defaults.budgetOptions);
+                const duration = randChoice(['1-2 天','3-5 天','一周及以上']);
+                const people = randChoice(['亲子','夫妻/情侣','单身/青年','老人陪同']);
+
+                // create DOM
+                const card = document.createElement('div');
+                card.className = 'plan-card';
+                // store metadata for filtering
+                card.dataset.pace = pace;
+                card.dataset.budget = budget;
+                card.dataset.duration = duration;
+                card.dataset.people = people;
+                card.dataset.tags = planTags.join(',');
+
+                const meta = document.createElement('div');
+                meta.className = 'plan-meta';
+                const title = document.createElement('strong');
+                title.textContent = `方案 ${String.fromCharCode(65+i)} · ${planTags.slice(0,3).join(' + ')}`;
+                meta.appendChild(title);
+                const pillPace = document.createElement('span'); pillPace.className='pill'; pillPace.textContent = `节奏：${pace}`;
+                const pillBudget = document.createElement('span'); pillBudget.className='pill'; pillBudget.textContent = `预算：${budget}`;
+                const pillDuration = document.createElement('span'); pillDuration.className='pill'; pillDuration.textContent = duration;
+                meta.appendChild(pillPace); meta.appendChild(pillBudget); meta.appendChild(pillDuration);
+
+                const desc = document.createElement('p'); desc.className='muted'; desc.textContent = '可视化预览 · 可编辑 · 可导出';
+
+                const actions = document.createElement('div'); actions.className='plan-actions';
+                const btnView = document.createElement('button'); btnView.className='btn small'; btnView.textContent='查看';
+                const btnEdit = document.createElement('button'); btnEdit.className='btn small'; btnEdit.textContent='编辑';
+                const btnExport = document.createElement('button'); btnExport.className='btn btn-outline small'; btnExport.textContent='导出';
+                const btnHost = document.createElement('button'); btnHost.className='btn small'; btnHost.textContent='托管到管家';
+
+                // placeholders for actions
+                btnView.addEventListener('click', ()=> alert(`查看 ${title.textContent}\n标签：${planTags.join(', ')}`));
+                btnEdit.addEventListener('click', ()=> alert(`编辑（占位） ${title.textContent}`));
+                btnExport.addEventListener('click', ()=> alert(`导出（占位） ${title.textContent}`));
+                btnHost.addEventListener('click', ()=> alert(`已托管到管家（占位） ${title.textContent}`));
+
+                actions.appendChild(btnView); actions.appendChild(btnEdit); actions.appendChild(btnExport); actions.appendChild(btnHost);
+
+                card.appendChild(meta); card.appendChild(desc); card.appendChild(actions);
+                planList.appendChild(card);
+            }
+        }
+
+        // initial sample
+        generatePlans(2);
+
+        // generate button
+        btnGenerate.addEventListener('click', ()=>{
+            generatePlans(3);
+            // scroll to plans
+            planList.scrollIntoView({behavior:'smooth', block:'start'});
+        });
+
+        // random style: pick a pace and generate plans emphasizing it
+        btnRandom.addEventListener('click', ()=>{
+            const paceOptions = ['轻松','适中','紧凑','自由活动优先'];
+            const pick = paceOptions[Math.floor(Math.random()*paceOptions.length)];
+            generatePlans(3, pick);
+            planList.scrollIntoView({behavior:'smooth', block:'start'});
+        });
+
+        // preview sample - scroll into view
+        previewSample.addEventListener('click', ()=> {
+            if (!planList.children.length) generatePlans(2);
+            planList.firstElementChild.scrollIntoView({behavior:'smooth', block:'center'});
+        });
+
+        // apply filters - filter existing cards by matching metadata
+        btnApplyFilters.addEventListener('click', ()=>{
+            const filters = (function(){
+                const pace = document.getElementById('filterPace').value;
+                const budget = document.getElementById('filterBudget').value;
+                const duration = document.getElementById('filterDuration').value;
+                const transport = Array.from(document.querySelectorAll('#filterTransport input:checked')).map(i=>i.value);
+                const stay = Array.from(document.querySelectorAll('#filterStay input:checked')).map(i=>i.value);
+                const people = Array.from(document.querySelectorAll('#filterPeople input:checked')).map(i=>i.value);
+                const season = Array.from(document.querySelectorAll('#filterSeason input:checked')).map(i=>i.value);
+                return {pace,budget,duration,transport,stay,people,season};
+            })();
+
+            // For demo, we only filter by pace, budget, duration, people (metadata present)
+            const cards = Array.from(planList.querySelectorAll('.plan-card'));
+            let shown = 0;
+            cards.forEach(card=>{
+                let ok = true;
+                if (filters.pace && card.dataset.pace !== filters.pace) ok = false;
+                if (filters.budget && card.dataset.budget !== filters.budget) ok = false;
+                if (filters.duration && card.dataset.duration !== filters.duration) ok = false;
+                if (filters.people.length && !filters.people.includes(card.dataset.people)) ok = false;
+                card.style.display = ok ? '' : 'none';
+                if (ok) shown++;
+            });
+            if (shown === 0) alert('无匹配方案，请尝试清除筛选或生成更多方案。');
+        });
+
+        // reset filters
+        btnResetFilters.addEventListener('click', ()=>{
+            document.getElementById('filtersForm').reset();
+            const cards = Array.from(planList.querySelectorAll('.plan-card'));
+            cards.forEach(c=> c.style.display = '');
+        });
+
+        // small UX: pressing Ctrl/Cmd + A selects all tags (convenience)
+        document.addEventListener('keydown', (e)=>{
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                tagButtons.forEach(b => { b.classList.add('active'); selectedTags.add(b.dataset.tag); });
+            }
+        });
+
+    })();
+</script>
 </body>
 </html>
