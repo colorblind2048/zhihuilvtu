@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>智绘旅途 | 首页</title>
+
+<style>
+  /* 背景与全局设置 */
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: url("assets/your-bg.jpg") no-repeat center center/cover;
+    height: 100vh;
+    color: white;
+    position: relative;
+  }
+
+  /* 暗色遮罩（科技风暗色效果） */
+  body::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+    z-index: 0;
+  }
+.nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 50px;
+  font-size: 18px;
+
+  /* ⭐ 更亮的科技蓝 + 更低透明度 + 柔光层 */
+  background: rgba(0, 158, 255, 0.55);   /* 更亮 & 更实一点的浅蓝 */
+  backdrop-filter: blur(8px);
+
+  /* 给导航栏加一点光泽 */
+  box-shadow: 0 2px 8px rgba(0, 180, 255, 0.35);
+
+  /* 更细致的底部分割线 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* 图标颜色不变（仍然亮白科技风） */
+.nav-left svg path {
+  stroke: #e9f4ff;
+}
+
+  .nav-left {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e9f4ff;
+  }
+
+  .nav-right a {
+    margin-left: 30px;
+    text-decoration: none;
+    color: #e9f4ff;
+    font-weight: 500;
+  }
+
+  .nav-right a:hover {
+    color: #ffffff;
+  }
+
+  /* 主内容区（左侧标题 + 描述 + 按钮） */
+  .content {
+    position: relative;
+    z-index: 2;
+    margin-top: 120px;
+    padding-left: 80px;
+    width: 50%;
+  }
+
+  .title {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: #cfe2ff;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  }
+
+  .desc {
+    font-size: 20px;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    color: #e3ecff;
+    margin-bottom: 40px;
+  }
+
+  /* 按钮 */
+  .btn-enter {
+    display: inline-block;
+    padding: 15px 35px;
+    background: #2ecc71;
+    color: white;
+    font-size: 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,255,150,0.4);
+  }
+
+  .btn-enter:hover {
+    background: #27ae60;
+    box-shadow: 0 6px 18px rgba(0,255,150,0.5);
+  }
+
+</style>
+</head>
+
+<body>
+<!-- 顶部导航栏 -->
+<div class="nav">
+  <div class="nav-left">
+    <!-- 纸飞机图标（SVG） -->
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 10px;">
+      <path d="M2 12L22 2L14 22L12 14L2 12Z" stroke="#e9f4ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+
+    智绘旅途
+  </div>
+
+  <div class="nav-right">
+    <a href=" ">首页</a >
+    <a href="#">功能介绍</a >
+    <a href="#">团队</a >
+    <a href="#">联系我们</a >
+  </div>
+</div>
+
+<!-- 中间内容 -->
+<div class="content">
+  <div class="title">欢迎来到智绘旅途</div>
+  <div class="desc">
+    一个基于 AI 技术的智能旅行规划平台，<br>
+    致力于为你提供个性化、可调整、可验证的旅行方案。<br>
+    点击下方按钮进入体验。
+  </div>
+
+  <a href="main.html" class="btn-enter">进入旅行平台</a >
+</div>
+
+</body>
+</html>
