@@ -16,7 +16,6 @@
     position: relative;
   }
 
-  /* 暗色遮罩（科技风暗色效果） */
   body::after {
     content: "";
     position: absolute;
@@ -27,7 +26,6 @@
     z-index: 0;
   }
 
-  /* ⭐ 顶部导航栏（亮蓝科技风 + 登录/注册按钮） */
   .nav {
     position: relative;
     z-index: 2;
@@ -36,7 +34,7 @@
     padding: 20px 50px;
     font-size: 18px;
 
-    background: rgba(0, 158, 255, 0.55);   /* 明亮科技蓝 */
+    background: rgba(0, 158, 255, 0.55); 
     backdrop-filter: blur(8px);
     box-shadow: 0 2px 8px rgba(0, 180, 255, 0.35);
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
@@ -50,12 +48,10 @@
     align-items: center;
   }
 
-  /* 保持纸飞机亮色 */
   .nav-left svg path {
     stroke: #e9f4ff;
   }
 
-  /* 普通导航链接 */
   .nav-right a {
     margin-left: 30px;
     text-decoration: none;
